@@ -7,6 +7,9 @@ coreurl = /calls
 trxurl = /transmitters
 statefile = /opt/dapnet/Core/local/data/State.json
 
+[telegram]
+token = TOKEN
+
 [misc]
 logfile = /opt/dapnet/dapnet2telegram/dapnet2telegram.log
 

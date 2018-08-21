@@ -56,6 +56,9 @@ hampagerpassword = cfg.get('dapnet','password')
 hampagerurl = cfg.get('dapnet','baseurl') + cfg.get('dapnet','coreurl')
 statefile = cfg.get('dapnet','statefile')
 
+# Leggo il token per Telegram
+telegramtoken = cfg.get('telegram','token')
+
 # logging.basicConfig(filename='winlinktodapnet.log',level=logging.INFO) # level=10
 logger = logging.getLogger('dapnet2telegram')
 handler = logging.FileHandler(logfile)
@@ -64,7 +67,7 @@ handler.setFormatter(logformat)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
-updater = Updater(token='685800844:AAEtKV1pW0_VJnWKqlwMiqASjw_3l0gpep8')
+updater = Updater(token=telegramtoken)
 dispatcher = updater.dispatcher
 
 # Comando di start
