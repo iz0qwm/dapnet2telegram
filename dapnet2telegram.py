@@ -14,7 +14,6 @@
 
 # Author: Raffaello Di Martino IZ0QWM
 # Date: 18.08.2018
-# Version v1.2.0
 
 import logging
 import urllib2
@@ -35,8 +34,8 @@ from telegram.ext import Updater
 from telegram.ext import CommandHandler
 from telegram.ext import MessageHandler, Filters
 from pprint import pprint
-
-version = "v1.2.0"
+import subprocess
+version = subprocess.check_output(["git", "describe"]).strip()
 
 # Leggo il file di configurazione
 cfg = configparser.RawConfigParser()
