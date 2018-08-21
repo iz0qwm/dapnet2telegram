@@ -80,7 +80,7 @@ dispatcher.add_handler(start_handler)
 
 # Comando di About
 def about(bot, update):
-    bot.send_message(chat_id=update.message.chat_id, text="*Software version*: " + version + "\r\n*Author*: Raffaello IZ0QWM\r\n*Server connection*: " + hampagerurl + "\r\n", parse_mode='Markdown')
+    bot.send_message(chat_id=update.message.chat_id, text="*Software version*: " + version + "\r\n*Author*: Raffaello IZ0QWM\r\n*Server connection*: " + hampagerurl + "\r\n*Github*: [dapnet2telegram](https://github.com/iz0qwm/dapnet2telegram)", parse_mode='Markdown')
 
 about_handler = CommandHandler('about', about)
 dispatcher.add_handler(about_handler)
