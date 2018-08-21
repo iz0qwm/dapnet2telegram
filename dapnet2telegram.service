@@ -1,0 +1,13 @@
+[Unit]
+Description=Telegram Bot fro DAPNET Italia
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/opt/dapnet/dapnet2telegram/dapnet2telegram.py &
+WorkingDirectory=/opt/dapnet/dapnet2telegram/
+User=root
+
+[Install]
+WantedBy=multi-user.target
+

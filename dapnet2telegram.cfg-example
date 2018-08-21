@@ -1,0 +1,12 @@
+[dapnet]
+user = iz0qwm
+password = password
+transmittergrp = italia
+baseurl = http://www.dapnet-italia.it:8080
+coreurl = /calls
+trxurl = /transmitters
+statefile = /opt/dapnet/Core/local/data/State.json
+
+[misc]
+logfile = /opt/dapnet/dapnet2telegram/dapnet2telegram.log
+
