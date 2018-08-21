@@ -14,7 +14,7 @@
 
 # Author: Raffaello Di Martino IZ0QWM
 # Date: 18.08.2018
-# Version 0.1
+# Version v1.2.0
 
 import logging
 import urllib2
@@ -35,6 +35,8 @@ from telegram.ext import Updater
 from telegram.ext import CommandHandler
 from telegram.ext import MessageHandler, Filters
 from pprint import pprint
+
+version = "v1.2.0"
 
 # Leggo il file di configurazione
 cfg = configparser.RawConfigParser()
@@ -79,14 +81,14 @@ dispatcher.add_handler(start_handler)
 
 # Comando di About
 def about(bot, update):
-    bot.send_message(chat_id=update.message.chat_id, text="*Software version*: 1.2.0\r\n*Author*: Raffaello IZ0QWM\r\n", parse_mode='Markdown')
+    bot.send_message(chat_id=update.message.chat_id, text="*Software version*: " + version + "\r\n*Author*: Raffaello IZ0QWM\r\n*Server connection*: " + hampagerurl + "\r\n", parse_mode='Markdown')
 
 about_handler = CommandHandler('about', about)
 dispatcher.add_handler(about_handler)
 
 # Comando help
 def help(bot, update):
-    bot.send_message(chat_id=update.message.chat_id, text="Puoi darmi i seguenti comandi:\r\n*/help* per i comandi\r\n------\r\n*/check CALLSIGN* - per controllare se il CALLSIGN e' registrato su DAPNET\r\n------\r\n*/send FROM TO TRGROUP Messaggio* - per inviare un messaggio:\r\n*FROM:* e' il tuo nominativo\r\n*TO:* il nominativo del destinatario\r\n*TRGROUP:* il transmitter group\r\n------\r\n*/calls N* - la lista degli ultimi N messaggi inviati (max. 10)\r\n------\r\n*/trgroups* - per la lista dei transmitters groups\r\n------\r\n", parse_mode='Markdown')
+    bot.send_message(chat_id=update.message.chat_id, text="Puoi darmi i seguenti comandi:\r\n*/help* per i comandi\r\n------\r\n*/about* informazioni e versione\r\n------\r\n*/check CALLSIGN* - per controllare se il CALLSIGN e' registrato su DAPNET\r\n------\r\n*/send FROM TO TRGROUP Messaggio* - per inviare un messaggio:\r\n*FROM:* e' il tuo nominativo\r\n*TO:* il nominativo del destinatario\r\n*TRGROUP:* il transmitter group\r\n------\r\n*/calls N* - la lista degli ultimi N messaggi inviati (max. 10)\r\n------\r\n*/trgroups* - per la lista dei transmitters groups\r\n------\r\n", parse_mode='Markdown')
 
 help_handler = CommandHandler('help', help)
 dispatcher.add_handler(help_handler)
