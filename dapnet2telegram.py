@@ -29,6 +29,7 @@ import string
 import requests
 import websocket
 import string
+import ast
 import json
 from telegram.ext import Updater
 from telegram.ext import CommandHandler
@@ -199,10 +200,11 @@ def calls(bot, update, args):
         orario = str(data["calls"][i]["timestamp"])
         giorno,ora_completa = orario.split("T")
         ora,escluso = ora_completa.split(".")
-        mittente = str(data["calls"][i]["callSignNames"])
-        trgroup = str(data["calls"][i]["transmitterGroupNames"])
+        # Uso json.dumps per rimuovere le u di Unicode
+        mittente = json.dumps(data["calls"][i]["callSignNames"])
+        trgroup = json.dumps(data["calls"][i]["transmitterGroupNames"])
 
-        output = output + "*-*" + giorno + " " + ora + " - *TO:*" + mittente + " - *FROM:*" + testo + " - *TRGROUP:*" + trgroup + "\r\n"
+        output = output + "*-*" + giorno + " " + ora + " - *TO:*" + mittente.replace(r'"','') + " - *FROM:*" + testo + " - *TRGROUP:*" + trgroup.replace(r'"','') + "\r\n"
 
     bot.send_message(chat_id=update.message.chat_id, text=output, parse_mode='Markdown')
 
@@ -218,12 +220,11 @@ def trgroups(bot, update):
     
     output = ""
     for i in data["transmitterGroups"]: 
-        #print(str(i)) 
-        #pprint(data["transmitterGroups"]["pocgat"]["name"])
         nome = str(data["transmitterGroups"][i]["name"])
         descrizione = str(data["transmitterGroups"][i]["description"])
-        trx = str(data["transmitterGroups"][i]["transmitterNames"])
-        output = output + "*Nome:* " + nome + " - *Descr.:*" + descrizione + " - *TRX:*" + trx + "\r\n\r\n"
+        # Uso json.dumps per rimuovere le u di Unicode
+        trx = json.dumps(data["transmitterGroups"][i]["transmitterNames"])
+        output = output + "*Nome:* " + nome + " - *Descr.:*" + descrizione + " - *TRX:*" + trx.replace(r'"','') + "\r\n\r\n"
 
     bot.send_message(chat_id=update.message.chat_id, text=output, parse_mode='Markdown')
 
