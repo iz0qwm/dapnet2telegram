@@ -136,9 +136,13 @@ def check(bot, update, args):
       # Se esiste controllo il json
       with open(statefile, 'r') as data_file:    
           data = json.load(data_file)
-      ric = str(data["callSigns"][callsign]["pagers"][0]["number"])
-      nome = str(data["callSigns"][callsign]["description"])
-      output = "*Call:* " + callsign + " - *Nome:* " + nome + " - *RIC:* " + ric
+      # Se esiste tra i callsigns
+      if callsign in data["callSigns"]:
+          ric = str(data["callSigns"][callsign]["pagers"][0]["number"])
+          nome = str(data["callSigns"][callsign]["description"])
+          output = "*Call:* " + callsign + " - *Nome:* " + nome + " - *RIC:* " + ric
+      else:
+          output = "Mi dispiace, " + callsign + " non e' registrato come user" 
     else: 
       output = "Mi dispiace, " + callsign + " non e' registrato."
 
@@ -156,14 +160,16 @@ def trx(bot, update, args):
       # Se esiste controllo il json
       with open(statefile, 'r') as data_file:
           data = json.load(data_file)
-      status = str(data["transmitters"][callsign]["status"])
-      nome = str(data["transmitters"][callsign]["name"])
-      timeslot = str(data["transmitters"][callsign]["timeSlot"])
-      latitudine = float(data["transmitters"][callsign]["latitude"])
-      longitudine = float(data["transmitters"][callsign]["longitude"])
-      #print(latitudine)
+      if callsign in data["transmitters"]:
+        status = str(data["transmitters"][callsign]["status"])
+        nome = str(data["transmitters"][callsign]["name"])
+        timeslot = str(data["transmitters"][callsign]["timeSlot"])
+        latitudine = float(data["transmitters"][callsign]["latitude"])
+        longitudine = float(data["transmitters"][callsign]["longitude"])
+        output = "*Call:* " + nome + " - *Stato:* " + status + " - *timeslot:* " + timeslot + "\r\n*Location:*"
+      else:
+        output = "Mi dispiace, " + callsign + " non e' registrato come transmitter"
 
-      output = "*Call:* " + nome + " - *Stato:* " + status + " - *timeslot:* " + timeslot + "\r\n*Location:*"
     else:
       output = "Mi dispiace, " + callsign + " non e' registrato."
 
