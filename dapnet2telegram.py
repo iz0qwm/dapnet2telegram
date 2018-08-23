@@ -33,6 +33,8 @@ import json
 from telegram.ext import Updater
 from telegram.ext import CommandHandler
 from telegram.ext import MessageHandler, Filters
+from telegram import Location
+from telegram.error import BadRequest
 from pprint import pprint
 import subprocess
 version = subprocess.check_output(["git", "describe"]).strip()
@@ -87,7 +89,7 @@ dispatcher.add_handler(about_handler)
 
 # Comando help
 def help(bot, update):
-    bot.send_message(chat_id=update.message.chat_id, text="Puoi darmi i seguenti comandi:\r\n*/help* per i comandi\r\n------\r\n*/about* informazioni e versione\r\n------\r\n*/check CALLSIGN* - per controllare se il CALLSIGN e' registrato su DAPNET\r\n------\r\n*/send FROM TO TRGROUP Messaggio* - per inviare un messaggio:\r\n*FROM:* e' il tuo nominativo\r\n*TO:* il nominativo del destinatario\r\n*TRGROUP:* il transmitter group\r\n------\r\n*/calls N* - la lista degli ultimi N messaggi inviati (max. 10)\r\n------\r\n*/trgroups* - per la lista dei transmitters groups\r\n------\r\n", parse_mode='Markdown')
+    bot.send_message(chat_id=update.message.chat_id, text="Puoi darmi i seguenti comandi:\r\n*/help* per i comandi\r\n------\r\n*/about* informazioni e versione\r\n------\r\n*/check CALLSIGN* - per controllare se il CALLSIGN e' registrato su DAPNET\r\n------\r\n*/send FROM TO TRGROUP Messaggio* - per inviare un messaggio:\r\n*FROM:* e' il tuo nominativo\r\n*TO:* il nominativo del destinatario\r\n*TRGROUP:* il transmitter group\r\n------\r\n*/calls N* - la lista degli ultimi N messaggi inviati (max. 10)\r\n------\r\n*/trgroups* - per la lista dei transmitters groups\r\n------\r\n*/trx CALL* - per richiedere info sullo stato di un transmitter\r\n------\r\n", parse_mode='Markdown')
 
 help_handler = CommandHandler('help', help)
 dispatcher.add_handler(help_handler)
@@ -125,7 +127,7 @@ def send(bot, update, args):
 send_handler = CommandHandler('send', send, pass_args=True)
 dispatcher.add_handler(send_handler)
 
-# Comando check
+# Comando check - Controllo nominativi
 def check(bot, update, args):
     callsign_argomento = str(args[0])
     callsign = callsign_argomento.lower()
@@ -144,6 +146,32 @@ def check(bot, update, args):
 
 check_handler = CommandHandler('check', check, pass_args=True)
 dispatcher.add_handler(check_handler)
+
+# Comando trx - Controllo stato transmitters
+def trx(bot, update, args):
+    callsign_argomento = str(args[0])
+    callsign = callsign_argomento.lower()
+    # Controllo prima se esiste nel file
+    if callsign in open(statefile).read():
+      # Se esiste controllo il json
+      with open(statefile, 'r') as data_file:
+          data = json.load(data_file)
+      status = str(data["transmitters"][callsign]["status"])
+      nome = str(data["transmitters"][callsign]["name"])
+      timeslot = str(data["transmitters"][callsign]["timeSlot"])
+      latitudine = float(data["transmitters"][callsign]["latitude"])
+      longitudine = float(data["transmitters"][callsign]["longitude"])
+      #print(latitudine)
+
+      output = "*Call:* " + nome + " - *Stato:* " + status + " - *timeslot:* " + timeslot
+    else:
+      output = "Mi dispiace, " + callsign + " non e' registrato."
+
+    bot.send_message(chat_id=update.message.chat_id, text=output, parse_mode='Markdown')
+    bot.send_location(chat_id=update.message.chat_id, latitude=latitudine, longitude=longitudine, live_period=80)
+
+trx_handler = CommandHandler('trx', trx, pass_args=True)
+dispatcher.add_handler(trx_handler)
 
 # Comando calls (messaggi)
 def calls(bot, update, args):
