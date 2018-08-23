@@ -163,7 +163,7 @@ def trx(bot, update, args):
       longitudine = float(data["transmitters"][callsign]["longitude"])
       #print(latitudine)
 
-      output = "*Call:* " + nome + " - *Stato:* " + status + " - *timeslot:* " + timeslot
+      output = "*Call:* " + nome + " - *Stato:* " + status + " - *timeslot:* " + timeslot + "\r\n*Location:*"
     else:
       output = "Mi dispiace, " + callsign + " non e' registrato."
 
