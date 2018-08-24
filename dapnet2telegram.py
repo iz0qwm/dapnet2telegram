@@ -63,6 +63,9 @@ statefile = cfg.get('dapnet','statefile')
 # Leggo il token per Telegram
 telegramtoken = cfg.get('telegram','token')
 
+# Leggo il file di presenza per aprs
+aprspresencefile = cfg.get('aprsis','presencefile')
+
 # logging.basicConfig(filename='winlinktodapnet.log',level=logging.INFO) # level=10
 logger = logging.getLogger('dapnet2telegram')
 handler = logging.FileHandler(logfile)
@@ -83,14 +86,14 @@ dispatcher.add_handler(start_handler)
 
 # Comando di About
 def about(bot, update):
-    bot.send_message(chat_id=update.message.chat_id, text="*Software version*: " + version + "\r\n*Author*: Raffaello IZ0QWM\r\n*Server connection*: " + hampagerurl + "\r\n*Github*: [dapnet2telegram](https://github.com/iz0qwm/dapnet2telegram)", parse_mode='Markdown')
+    bot.send_message(chat_id=update.message.chat_id, text="*Software version*: " + version + "\r\n*Author*: Raffaello IZ0QWM\r\n*Server connection*: " + hampagerurl + "\r\n*Github*: [dapnet2telegram](https://github.com/iz0qwm/dapnet2telegram)", parse_mode='Markdown', disable_web_page_preview=True)
 
 about_handler = CommandHandler('about', about)
 dispatcher.add_handler(about_handler)
 
 # Comando help
 def help(bot, update):
-    bot.send_message(chat_id=update.message.chat_id, text="Puoi darmi i seguenti comandi:\r\n*/help* per i comandi\r\n------\r\n*/about* informazioni e versione\r\n------\r\n*/check CALLSIGN* - per controllare se il CALLSIGN e' registrato su DAPNET\r\n------\r\n*/send FROM TO TRGROUP Messaggio* - per inviare un messaggio:\r\n*FROM:* e' il tuo nominativo\r\n*TO:* il nominativo del destinatario\r\n*TRGROUP:* il transmitter group\r\n------\r\n*/calls N* - la lista degli ultimi N messaggi inviati (max. 10)\r\n------\r\n*/trgroups* - per la lista dei transmitters groups\r\n------\r\n*/trx CALL* - per richiedere info sullo stato di un transmitter\r\n------\r\n", parse_mode='Markdown')
+    bot.send_message(chat_id=update.message.chat_id, text="Puoi darmi i seguenti comandi:\r\n*/help* per i comandi\r\n------\r\n*/about* informazioni e versione\r\n------\r\n*/check CALLSIGN* - per controllare se il CALLSIGN e' registrato su DAPNET\r\n------\r\n*/send FROM TO TRGROUP Messaggio* - per inviare un messaggio:\r\n*FROM:* e' il tuo nominativo\r\n*TO:* il nominativo del destinatario\r\n*TRGROUP:* il transmitter group\r\n------\r\n*/calls N* - la lista degli ultimi N messaggi inviati (max. 10)\r\n------\r\n*/trgroups* - per la lista dei transmitters groups\r\n------\r\n*/trx CALL* - per richiedere info sullo stato di un transmitter\r\n------\r\n*/aprs* - per la lista degli user raggiungibili via APRS", parse_mode='Markdown')
 
 help_handler = CommandHandler('help', help)
 dispatcher.add_handler(help_handler)
@@ -230,6 +233,28 @@ def trgroups(bot, update):
 
 trgroups_handler = CommandHandler('trgroups', trgroups)
 dispatcher.add_handler(trgroups_handler)
+
+# Comando aprs (Controllo utenti raggiungibili via aprs)
+def aprs(bot, update):
+
+    output = ""
+    presencefile = open(aprspresencefile, 'r')
+    with presencefile as file:
+       file.seek(0) #sono all'inzion del file
+       primo_carattere = file.read(1) # Prendo il primo carattere
+       if not primo_carattere:
+          output = "Nessun user DAPNET presente su APRS"
+       else:
+          file.seek(0) # ritorno all'inizio del file
+          for line in presencefile:
+               call = line
+               output = output + line
+
+    bot.send_message(chat_id=update.message.chat_id, text="Elenco degli user DAPNET che possono ricevere messaggi anche via APRS. Per informazioni su come funziona il gateway *DAPNET <-> APRS* visitare:\r\n*Github*: [dapaprsgate](https://github.com/iz0qwm/dapaprsgate)", parse_mode='Markdown', disable_web_page_preview=True)
+    bot.send_message(chat_id=update.message.chat_id, text=output, parse_mode='Markdown')
+
+aprs_handler = CommandHandler('aprs', aprs)
+dispatcher.add_handler(aprs_handler)
 
 # Comando Unknown
 def unknown(bot, update):
