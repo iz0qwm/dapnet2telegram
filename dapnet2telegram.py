@@ -207,7 +207,7 @@ def calls(bot, update, args):
         mittente = json.dumps(data["calls"][i]["callSignNames"])
         trgroup = json.dumps(data["calls"][i]["transmitterGroupNames"])
 
-        output = output + "*-*" + giorno + " " + ora + " - *TO:*" + mittente.replace(r'"','') + " - *FROM:*" + testo + " - *TRGROUP:*" + trgroup.replace(r'"','') + "\r\n"
+        output = output + "*-* " + giorno + " " + ora + " - *TO:* " + mittente.replace(r'"','') + " - *TRGROUP:* " + trgroup.replace(r'"','') + "\r\n" + "*FROM:* " + testo + "\r\n\r\n"
 
     bot.send_message(chat_id=update.message.chat_id, text=output, parse_mode='Markdown')
 
