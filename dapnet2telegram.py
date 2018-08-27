@@ -48,7 +48,7 @@ try:
     cfg.read(config_file)
 except:
     # no luck reading the config file, write error and bail out
-    logger.error('winlinktodapnet could not find / read config file')
+    print("winlinktodapnet could not find / read config file")
     sys.exit(0)
 
 # Leggo la posizione del logfile
@@ -102,6 +102,10 @@ dispatcher.add_handler(help_handler)
 def send(bot, update, args):
     # Invio messaggio -> DAPNET
     #create the complete URL to send to DAPNET
+    if len(args) < 4:
+        output = "Devi inserire tutti i campi\r\n*/send FROM TO TRGROUP Messaggio*"
+        bot.send_message(chat_id=update.message.chat_id, text=output, parse_mode='Markdown')
+
     http = urllib3.PoolManager()
     headers = urllib3.util.make_headers(basic_auth= hampagerusername + ':' + hampagerpassword)
     da = str(args[0]).lower()
@@ -110,8 +114,6 @@ def send(bot, update, args):
     messaggio = " ".join(args[3:])
     payload = '{ "text": "'+ da +': ' + messaggio +'", "callSignNames": [ "' + to + '" ], "transmitterGroupNames": [ "' + trgroup +'" ], "emergency": false}'
     logger.info('Payload: %s', payload)
-    #print(headers)
-    #print(payload)
 
     try:
         #try to establish connection to DAPNET
@@ -133,6 +135,10 @@ dispatcher.add_handler(send_handler)
 
 # Comando check - Controllo nominativi
 def check(bot, update, args):
+    if len(args) < 1:
+        output = "Devi inserire tutti i campi\r\n*/check CALLSIGN*"
+        bot.send_message(chat_id=update.message.chat_id, text=output, parse_mode='Markdown')
+
     callsign_argomento = str(args[0])
     callsign = callsign_argomento.lower()
     # Controllo prima se esiste nel file
@@ -157,6 +163,10 @@ dispatcher.add_handler(check_handler)
 
 # Comando trx - Controllo stato transmitters
 def trx(bot, update, args):
+    if len(args) < 1:
+        output = "Devi inserire tutti i campi\r\n*/trx CALL*"
+        bot.send_message(chat_id=update.message.chat_id, text=output, parse_mode='Markdown')
+
     callsign_argomento = str(args[0])
     callsign = callsign_argomento.lower()
     # Controllo prima se esiste nel file
@@ -185,7 +195,12 @@ dispatcher.add_handler(trx_handler)
 
 # Comando calls (messaggi)
 def calls(bot, update, args):
-    scelta = int(args[0])
+    if len(args) < 1:
+        output = "Non hai inserito alcun valore, ti presento gli ultimi 3 messaggi\r\n"
+        bot.send_message(chat_id=update.message.chat_id, text=output, parse_mode='Markdown')
+        scelta = 3
+    else:
+        scelta = int(args[0])
 
     if scelta > 10:
 	scelta = 10
@@ -250,7 +265,7 @@ def aprs(bot, update):
                call = line
                output = output + line
 
-    bot.send_message(chat_id=update.message.chat_id, text="Elenco degli user DAPNET che possono ricevere messaggi anche via APRS. Per informazioni su come funziona il gateway *DAPNET <-> APRS* visitare:\r\n*Github*: [dapaprsgate](https://github.com/iz0qwm/dapaprsgate)", parse_mode='Markdown', disable_web_page_preview=True)
+    bot.send_message(chat_id=update.message.chat_id, text="Elenco degli user DAPNET che possono ricevere messaggi anche via APRS.\r\n*ATTENZIONE*: inviare i messaggi ai CALL senza il SSID (Es. IZ0QWM-9 va inviato a IZ0QWM)\r\nPer informazioni su come funziona il gateway *DAPNET <-> APRS* visitare:\r\n*Github*: [dapaprsgate](https://github.com/iz0qwm/dapaprsgate)", parse_mode='Markdown', disable_web_page_preview=True)
     bot.send_message(chat_id=update.message.chat_id, text=output, parse_mode='Markdown')
 
 aprs_handler = CommandHandler('aprs', aprs)
