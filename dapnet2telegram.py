@@ -48,7 +48,7 @@ try:
     cfg.read(config_file)
 except:
     # no luck reading the config file, write error and bail out
-    print("winlinktodapnet could not find / read config file")
+    print(os.path.basename(__file__) + " could not find / read config file")
     sys.exit(0)
 
 # Leggo la posizione del logfile
@@ -101,34 +101,34 @@ dispatcher.add_handler(help_handler)
 # Comando send
 def send(bot, update, args):
     # Invio messaggio -> DAPNET
-    #create the complete URL to send to DAPNET
     if len(args) < 4:
         output = "Devi inserire tutti i campi\r\n*/send FROM TO TRGROUP Messaggio*"
         bot.send_message(chat_id=update.message.chat_id, text=output, parse_mode='Markdown')
-
-    http = urllib3.PoolManager()
-    headers = urllib3.util.make_headers(basic_auth= hampagerusername + ':' + hampagerpassword)
-    da = str(args[0]).lower()
-    to = str(args[1]).lower()
-    trgroup = str(args[2]).lower()
-    messaggio = " ".join(args[3:])
-    payload = '{ "text": "'+ da +': ' + messaggio +'", "callSignNames": [ "' + to + '" ], "transmitterGroupNames": [ "' + trgroup +'" ], "emergency": false}'
-    logger.info('Payload: %s', payload)
-
-    try:
-        #try to establish connection to DAPNET
-        response = requests.post(hampagerurl, headers=headers, data=payload)
-    except:
-        #connection to DAPNET failed, write warning to console, write warning to error log then bail out
-        logger.error('Invalid DAPNET credentials or payload not well done')
-        sys.exit(0)
     else:
-        #connection to DAPNET has been established, continue
-        logger.info('-------------------------------------------')
-        logger.info('MESSAGGIO INVIATO SU DAPNET')
-        logger.info('-------------------------------------------')
-	text_invio = "Messaggio inviato su DAPNET a " + to + " da " + da
-        bot.send_message(chat_id=update.message.chat_id, text=text_invio)
+        # Create the complete URL to send to DAPNET
+        http = urllib3.PoolManager()
+        headers = urllib3.util.make_headers(basic_auth= hampagerusername + ':' + hampagerpassword)
+        da = str(args[0]).lower()
+        to = str(args[1]).lower()
+        trgroup = str(args[2]).lower()
+        messaggio = " ".join(args[3:])
+        payload = '{ "text": "'+ da +': ' + messaggio +'", "callSignNames": [ "' + to + '" ], "transmitterGroupNames": [ "' + trgroup +'" ], "emergency": false}'
+        logger.info('Payload: %s', payload)
+
+        try:
+            # Try to establish connection to DAPNET
+            response = requests.post(hampagerurl, headers=headers, data=payload)
+        except:
+            # Connection to DAPNET failed, write warning to console, write warning to error log then bail out
+            logger.error('Invalid DAPNET credentials or payload not well done')
+            sys.exit(0)
+        else:
+            # Connection to DAPNET has been established, continue
+            logger.info('-------------------------------------------')
+            logger.info('MESSAGGIO INVIATO SU DAPNET')
+            logger.info('-------------------------------------------')
+	    text_invio = "Messaggio inviato su DAPNET a " + to + " da " + da
+            bot.send_message(chat_id=update.message.chat_id, text=text_invio)
 
 send_handler = CommandHandler('send', send, pass_args=True)
 dispatcher.add_handler(send_handler)
@@ -138,25 +138,24 @@ def check(bot, update, args):
     if len(args) < 1:
         output = "Devi inserire tutti i campi\r\n*/check CALLSIGN*"
         bot.send_message(chat_id=update.message.chat_id, text=output, parse_mode='Markdown')
+    else:
+        callsign = str(args[0]).strip().lower()
+        # Controllo prima se esiste nel file
+        if callsign in open(statefile).read():
+          # Se esiste controllo il json
+          with open(statefile, 'r') as data_file:    
+              data = json.load(data_file)
+          # Se esiste tra i callsigns
+          if callsign in data["callSigns"]:
+              ric = str(data["callSigns"][callsign]["pagers"][0]["number"])
+              nome = str(data["callSigns"][callsign]["description"])
+              output = "*Call:* " + callsign + " - *Nome:* " + nome + " - *RIC:* " + ric
+          else:
+              output = "Mi dispiace, " + callsign + " non e' registrato come user" 
+        else: 
+          output = "Mi dispiace, " + callsign + " non e' registrato."
 
-    callsign_argomento = str(args[0])
-    callsign = callsign_argomento.lower()
-    # Controllo prima se esiste nel file
-    if callsign in open(statefile).read():
-      # Se esiste controllo il json
-      with open(statefile, 'r') as data_file:    
-          data = json.load(data_file)
-      # Se esiste tra i callsigns
-      if callsign in data["callSigns"]:
-          ric = str(data["callSigns"][callsign]["pagers"][0]["number"])
-          nome = str(data["callSigns"][callsign]["description"])
-          output = "*Call:* " + callsign + " - *Nome:* " + nome + " - *RIC:* " + ric
-      else:
-          output = "Mi dispiace, " + callsign + " non e' registrato come user" 
-    else: 
-      output = "Mi dispiace, " + callsign + " non e' registrato."
-
-    bot.send_message(chat_id=update.message.chat_id, text=output, parse_mode='Markdown')
+        bot.send_message(chat_id=update.message.chat_id, text=output, parse_mode='Markdown')
 
 check_handler = CommandHandler('check', check, pass_args=True)
 dispatcher.add_handler(check_handler)
@@ -166,29 +165,29 @@ def trx(bot, update, args):
     if len(args) < 1:
         output = "Devi inserire tutti i campi\r\n*/trx CALL*"
         bot.send_message(chat_id=update.message.chat_id, text=output, parse_mode='Markdown')
-
-    callsign_argomento = str(args[0])
-    callsign = callsign_argomento.lower()
-    # Controllo prima se esiste nel file
-    if callsign in open(statefile).read():
-      # Se esiste controllo il json
-      with open(statefile, 'r') as data_file:
-          data = json.load(data_file)
-      if callsign in data["transmitters"]:
-        status = str(data["transmitters"][callsign]["status"])
-        nome = str(data["transmitters"][callsign]["name"])
-        timeslot = str(data["transmitters"][callsign]["timeSlot"])
-        latitudine = float(data["transmitters"][callsign]["latitude"])
-        longitudine = float(data["transmitters"][callsign]["longitude"])
-        output = "*Call:* " + nome + " - *Stato:* " + status + " - *timeslot:* " + timeslot + "\r\n*Location:*"
-      else:
-        output = "Mi dispiace, " + callsign + " non e' registrato come transmitter"
-
     else:
-      output = "Mi dispiace, " + callsign + " non e' registrato."
+        callsign_argomento = str(args[0])
+        callsign = callsign_argomento.lower()
+        # Controllo prima se esiste nel file
+        if callsign in open(statefile).read():
+          # Se esiste controllo il json
+          with open(statefile, 'r') as data_file:
+              data = json.load(data_file)
+          if callsign in data["transmitters"]:
+            status = str(data["transmitters"][callsign]["status"])
+            nome = str(data["transmitters"][callsign]["name"])
+            timeslot = str(data["transmitters"][callsign]["timeSlot"])
+            latitudine = float(data["transmitters"][callsign]["latitude"])
+            longitudine = float(data["transmitters"][callsign]["longitude"])
+            output = "*Call:* " + nome + " - *Stato:* " + status + " - *timeslot:* " + timeslot + "\r\n*Location:*"
+          else:
+            output = "Mi dispiace, " + callsign + " non e' registrato come transmitter"
 
-    bot.send_message(chat_id=update.message.chat_id, text=output, parse_mode='Markdown')
-    bot.send_location(chat_id=update.message.chat_id, latitude=latitudine, longitude=longitudine, live_period=80)
+        else:
+          output = "Mi dispiace, " + callsign + " non e' registrato."
+
+        bot.send_message(chat_id=update.message.chat_id, text=output, parse_mode='Markdown')
+        bot.send_location(chat_id=update.message.chat_id, latitude=latitudine, longitude=longitudine, live_period=80)
 
 trx_handler = CommandHandler('trx', trx, pass_args=True)
 dispatcher.add_handler(trx_handler)
@@ -203,7 +202,7 @@ def calls(bot, update, args):
         scelta = int(args[0])
 
     if scelta > 10:
-	scelta = 10
+        scelta = 10
     if scelta == 0:
         scelta = 1
     # Leggiamo il file State.json
