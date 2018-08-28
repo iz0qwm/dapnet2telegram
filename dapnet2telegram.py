@@ -38,6 +38,8 @@ from telegram import Location
 from telegram.error import BadRequest
 from pprint import pprint
 import subprocess
+from emoji import emojize
+
 version = subprocess.check_output(["git", "describe"]).strip()
 
 # Leggo il file di configurazione
@@ -102,7 +104,8 @@ dispatcher.add_handler(help_handler)
 def send(bot, update, args):
     # Invio messaggio -> DAPNET
     if len(args) < 4:
-        output = "Devi inserire tutti i campi\r\n*/send FROM TO TRGROUP Messaggio*"
+        output = ":warning: Devi inserire tutti i campi:\r\n*/send FROM TO TRGROUP Messaggio*"
+        output = emojize(output)
         bot.send_message(chat_id=update.message.chat_id, text=output, parse_mode='Markdown')
     else:
         # Create the complete URL to send to DAPNET
@@ -136,7 +139,8 @@ dispatcher.add_handler(send_handler)
 # Comando check - Controllo nominativi
 def check(bot, update, args):
     if len(args) < 1:
-        output = "Devi inserire tutti i campi\r\n*/check CALLSIGN*"
+        output = ":warning: Devi inserire tutti i campi:\r\n*/check CALLSIGN*"
+        output = emojize(output)
         bot.send_message(chat_id=update.message.chat_id, text=output, parse_mode='Markdown')
     else:
         callsign = str(args[0]).strip().lower()
@@ -155,6 +159,7 @@ def check(bot, update, args):
         else: 
           output = "Mi dispiace, " + callsign + " non e' registrato."
 
+	output = emojize(output)
         bot.send_message(chat_id=update.message.chat_id, text=output, parse_mode='Markdown')
 
 check_handler = CommandHandler('check', check, pass_args=True)
@@ -163,7 +168,8 @@ dispatcher.add_handler(check_handler)
 # Comando trx - Controllo stato transmitters
 def trx(bot, update, args):
     if len(args) < 1:
-        output = "Devi inserire tutti i campi\r\n*/trx CALL*"
+        output = ":warning: Devi inserire tutti i campi:\r\n*/trx CALL*"
+        output = emojize(output)
         bot.send_message(chat_id=update.message.chat_id, text=output, parse_mode='Markdown')
     else:
         callsign_argomento = str(args[0])
@@ -195,7 +201,8 @@ dispatcher.add_handler(trx_handler)
 # Comando calls (messaggi)
 def calls(bot, update, args):
     if len(args) < 1:
-        output = "Non hai inserito alcun valore, ti presento gli ultimi 3 messaggi\r\n"
+        output = "Non hai inserito alcun valore, ti presento gli ultimi 3 messaggi:\r\n"
+        output = emojize(output)
         bot.send_message(chat_id=update.message.chat_id, text=output, parse_mode='Markdown')
         scelta = 3
     else:
@@ -203,7 +210,7 @@ def calls(bot, update, args):
 
     if scelta > 10:
         scelta = 10
-    if scelta == 0:
+    if scelta < 1 :
         scelta = 1
     # Leggiamo il file State.json
     with open(statefile, 'r') as data_file:
@@ -212,7 +219,7 @@ def calls(bot, update, args):
     lunghezza = len(data["calls"])
 
     output = ""
-    for i in range(lunghezza-scelta, lunghezza): 
+    for i in range(lunghezza - scelta, lunghezza): 
         testo = str(data["calls"][i]["text"])
         orario = str(data["calls"][i]["timestamp"])
         giorno,ora_completa = orario.split("T")
@@ -221,8 +228,9 @@ def calls(bot, update, args):
         mittente = json.dumps(data["calls"][i]["callSignNames"])
         trgroup = json.dumps(data["calls"][i]["transmitterGroupNames"])
 
-        output = output + "*-* " + giorno + " " + ora + " - *TO:* " + mittente.replace(r'"','') + " - *TRGROUP:* " + trgroup.replace(r'"','') + "\r\n" + "*FROM:* " + testo + "\r\n\r\n"
-
+        output = output + ":pager: " + giorno + " " + ora + " - *TO:* " + mittente.replace(r'"','') + " - *TRGROUP:* " + trgroup.replace(r'"','') + "\r\n" + "*FROM:* " + testo + "\r\n\r\n"
+     
+    output = emojize(output)
     bot.send_message(chat_id=update.message.chat_id, text=output, parse_mode='Markdown')
 
 calls_handler = CommandHandler('calls', calls, pass_args=True)
