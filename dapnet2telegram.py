@@ -12,7 +12,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Author: Raffaello Di Martino IZ0QWM
+# Authors: Raffaello Di Martino IZ0QWM - Enrico Ardizzoni IW4DZV
 # Date: 18.08.2018
 
 import logging
