@@ -81,6 +81,7 @@ dispatcher = updater.dispatcher
 
 # Comando di start
 def start(bot, update):
+    logger.info("START: richiamato comando start");
     bot.send_message(chat_id=update.message.chat_id, text="Ciao, sono il *bot di DAPNET Italia*. Digita /help per i comandi", parse_mode='Markdown')
 
 start_handler = CommandHandler('start', start)
@@ -88,20 +89,23 @@ dispatcher.add_handler(start_handler)
 
 # Comando di About
 def about(bot, update):
-    bot.send_message(chat_id=update.message.chat_id, text="*Software version*: " + version + "\r\n*Author*: Raffaello IZ0QWM\r\n*Server connection*: " + hampagerurl + "\r\n*Github*: [dapnet2telegram](https://github.com/iz0qwm/dapnet2telegram)", parse_mode='Markdown', disable_web_page_preview=True)
+    logger.info("ABOUT: richiamato comando about");
+    bot.send_message(chat_id=update.message.chat_id, text="*Software version*: " + version + "\r\n*Authors*: Raffaello IZ0QWM - Enrico IW4DZV\r\n*Server connection*: " + hampagerurl + "\r\n*Github*: [dapnet2telegram](https://github.com/iz0qwm/dapnet2telegram)", parse_mode='Markdown', disable_web_page_preview=True)
 
 about_handler = CommandHandler('about', about)
 dispatcher.add_handler(about_handler)
 
 # Comando help
 def help(bot, update):
-    bot.send_message(chat_id=update.message.chat_id, text="Puoi darmi i seguenti comandi:\r\n*/help* per i comandi\r\n------\r\n*/about* informazioni e versione\r\n------\r\n*/check CALLSIGN* - per controllare se il CALLSIGN e' registrato su DAPNET\r\n------\r\n*/send FROM TO TRGROUP Messaggio* - per inviare un messaggio:\r\n*FROM:* e' il tuo nominativo\r\n*TO:* il nominativo del destinatario\r\n*TRGROUP:* il transmitter group\r\n------\r\n*/calls N* - la lista degli ultimi N messaggi inviati (max. 10)\r\n------\r\n*/trgroups* - per la lista dei transmitters groups\r\n------\r\n*/trx CALL* - per richiedere info sullo stato di un transmitter\r\n------\r\n*/aprs* - per la lista degli user raggiungibili via APRS", parse_mode='Markdown')
+    logger.info("HELP: richiamato comando help");
+    bot.send_message(chat_id=update.message.chat_id, text="Puoi darmi i seguenti comandi:\r\n*/help* per i comandi\r\n------\r\n*/about* informazioni e versione\r\n------\r\n*/check CALLSIGN* - per controllare se il CALLSIGN e' registrato su DAPNET\r\n------\r\n*/send FROM TO TRGROUP Messaggio* - per inviare un messaggio:\r\n*FROM:* e' il tuo nominativo\r\n*TO:* il nominativo del destinatario\r\n*TRGROUP:* il transmitter group\r\n------\r\n*/calls N* - la lista degli ultimi N messaggi inviati (max. 10)\r\n------\r\n*/trgroups* - per la lista dei transmitters groups\r\n------\r\n*/trx CALL* - per richiedere info sullo stato di un transmitter\r\n------\n\r*/rubrics [nome]* - per vedere la lista delle rubriche o l'ultima news in una rubrica\r\n------\r\n*/aprs* - per la lista degli user raggiungibili via APRS", parse_mode='Markdown')
 
 help_handler = CommandHandler('help', help)
 dispatcher.add_handler(help_handler)
 
 # Comando send
 def send(bot, update, args):
+    logger.info("SEND: richiamato comando send");
     # Invio messaggio -> DAPNET
     if len(args) < 4:
         output = ":warning: Devi inserire tutti i campi:\r\n*/send FROM TO TRGROUP Messaggio*"
@@ -116,7 +120,7 @@ def send(bot, update, args):
         trgroup = str(args[2]).lower()
         messaggio = " ".join(args[3:])
         payload = '{ "text": "'+ da +': ' + messaggio +'", "callSignNames": [ "' + to + '" ], "transmitterGroupNames": [ "' + trgroup +'" ], "emergency": false}'
-        logger.info('Payload: %s', payload)
+        logger.info('SEND: Payload: %s', payload)
 
         try:
             # Try to establish connection to DAPNET
@@ -127,9 +131,9 @@ def send(bot, update, args):
             sys.exit(0)
         else:
             # Connection to DAPNET has been established, continue
-            logger.info('-------------------------------------------')
-            logger.info('MESSAGGIO INVIATO SU DAPNET')
-            logger.info('-------------------------------------------')
+            # logger.info('-------------------------------------------')
+            logger.info('SEND: MESSAGGIO INVIATO SU DAPNET')
+            # logger.info('-------------------------------------------')
 	    text_invio = "Messaggio inviato su DAPNET a " + to + " da " + da
             bot.send_message(chat_id=update.message.chat_id, text=text_invio)
 
@@ -138,6 +142,7 @@ dispatcher.add_handler(send_handler)
 
 # Comando check - Controllo nominativi
 def check(bot, update, args):
+    logger.info("CHECK: richiamato comando check");
     if len(args) < 1:
         output = ":warning: Devi inserire tutti i campi:\r\n*/check CALLSIGN*"
         output = emojize(output)
@@ -167,6 +172,7 @@ dispatcher.add_handler(check_handler)
 
 # Comando trx - Controllo stato transmitters
 def trx(bot, update, args):
+    logger.info("TRX: richiamato comando trx");
     if len(args) < 1:
         output = ":warning: Devi inserire tutti i campi:\r\n*/trx CALL*"
         output = emojize(output)
@@ -200,6 +206,7 @@ dispatcher.add_handler(trx_handler)
 
 # Comando calls (messaggi)
 def calls(bot, update, args):
+    logger.info("CALLS: richiamato comando calls");
     if len(args) < 1:
         output = "Non hai inserito alcun valore, ti presento gli ultimi 3 messaggi:\r\n"
         output = emojize(output)
@@ -217,10 +224,14 @@ def calls(bot, update, args):
         data = json.load(data_file)
 
     lunghezza = len(data["calls"])
-
+    logger.info('CALLS: Lunghezza della sezione calls: %s', lunghezza);
+    # logger.info(json.dumps(data["calls"]));
     output = ""
     for i in range(lunghezza - scelta, lunghezza): 
-        testo = str(data["calls"][i]["text"])
+        #testo = str(data["calls"][i]["text"])
+        testo = json.dumps(data["calls"][i]["text"])
+        logger.info('CALLS: testo: %s', testo);
+        #orario = str(data["calls"][i]["timestamp"])
         orario = str(data["calls"][i]["timestamp"])
         giorno,ora_completa = orario.split("T")
         ora,escluso = ora_completa.split(".")
@@ -236,9 +247,53 @@ def calls(bot, update, args):
 calls_handler = CommandHandler('calls', calls, pass_args=True)
 dispatcher.add_handler(calls_handler)
 
+# Comando rubrics (rubriche)
+def rubrics(bot, update, args):
+    logger.info("RUBRICS: richiamato comando rubrics");
+    if len(args) < 1:
+    	# Leggiamo il file State.json
+    	with open(statefile, 'r') as data_file:
+        	data = json.load(data_file)
+
+    	# logger.info(json.dumps(data["rubrics"]));
+    	output = ""
+    	for i in data["rubrics"]:
+        	nome = json.dumps(data["rubrics"][i]["name"])
+        	#logger.info('RUBRICS: nome: %s', nome);
+        	numero = json.dumps(data["rubrics"][i]["number"])
+        	output = output + ":ledger: " + "*NOME:* " + nome + " - *NUMERO:* " + numero + "\r\n"
+
+        output1 = "Non hai inserito alcun nome di rubrica, ti presento la lista delle rubriche:\r\n"
+        output1 = emojize(output1)
+        bot.send_message(chat_id=update.message.chat_id, text=output1, parse_mode='Markdown')
+
+    	output = emojize(output)
+    	bot.send_message(chat_id=update.message.chat_id, text=output, parse_mode='Markdown')
+
+    else:
+        rubrica = str(args[0])
+    	logger.info('RUBRICS: ricevuto nome di rubrica: %s', rubrica);
+
+    	# Leggiamo il file State.json
+    	with open(statefile, 'r') as data_file:
+        	data = json.load(data_file)
+    	output = ""
+	if rubrica in data["news"]:
+       		testo = json.dumps(data["news"][rubrica][0]["text"])
+		output = output + ":scroll: " + "*TESTO:* " + testo + "\r\n"
+	else:
+             	output = "Mi dispiace, la rubrica" + rubrica + " non esiste"
+
+    	output = emojize(output)
+    	bot.send_message(chat_id=update.message.chat_id, text=output, parse_mode='Markdown')
+
+rubrics_handler = CommandHandler('rubrics', rubrics, pass_args=True)
+dispatcher.add_handler(rubrics_handler)
+
 # Comando trgroups (Transmitters groups)
 def trgroups(bot, update):
 
+    logger.info("TRGROUPS: richiamato comando trgroups");
     # Leggiamo il file State.json
     with open(statefile, 'r') as data_file:
         data = json.load(data_file)
@@ -259,6 +314,7 @@ dispatcher.add_handler(trgroups_handler)
 # Comando aprs (Controllo utenti raggiungibili via aprs)
 def aprs(bot, update):
 
+    logger.info("APRS: richiamato comando aprs");
     output = ""
     presencefile = open(aprspresencefile, 'r')
     with presencefile as file:
