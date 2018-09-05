@@ -7,6 +7,8 @@ Semplice Bot che:
 * Lista gli ultimi N messaggi inviati su DAPNET
 * Lista i gruppi di transmitters
 * Permette di vedere lo stato di un transmitter
+* Lista le rubriche
+* Vede l'ultima news di ogni rubrica
 * Lista gli user DAPNET raggiungibili via APRS
 
 ## Come funziona
@@ -38,4 +40,6 @@ TRGROUP: il transmitter group
 **/trx CALL** - per richiedere info sullo stato di un transmitter
 
 **/aprs** - per la lista degli user raggiungibili via APRS
+
+**/rubrics [nome]** - senza parametro, per vedere la lista delle rubriche altrimenti l'ultima news della rubrica scelta
 
